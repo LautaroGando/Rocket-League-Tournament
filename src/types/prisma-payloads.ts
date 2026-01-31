@@ -17,6 +17,7 @@ export interface PrismaMatchPayload {
   nextMatchId: string | null;
   nextMatchSlot: number | null;
   scheduledDate: Date | null | string;
+  postponed: boolean;
 }
 
 export interface PrismaPlayerPayload {

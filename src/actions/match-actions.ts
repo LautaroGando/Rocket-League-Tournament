@@ -16,6 +16,7 @@ export async function updateMatch(
   player1Stats?: { shots: number; saves: number; pointsInMatch: number },
   player2Stats?: { shots: number; saves: number; pointsInMatch: number },
   scheduledDate?: Date,
+  postponed?: boolean,
 ) {
   try {
     const match = await prisma.match.update({
@@ -25,6 +26,7 @@ export async function updateMatch(
         score2,
         played: true,
         isOvertime,
+        postponed: postponed || false,
         p1Shots: player1Stats?.shots || 0,
         p1Saves: player1Stats?.saves || 0,
         p1Points: player1Stats?.pointsInMatch || 0,
@@ -32,7 +34,7 @@ export async function updateMatch(
         p2Saves: player2Stats?.saves || 0,
         p2Points: player2Stats?.pointsInMatch || 0,
         scheduledDate: scheduledDate,
-      } as unknown as Prisma.MatchUpdateInput,
+      },
     });
 
     if (match.nextMatchId && score1 !== null && score2 !== null) {
@@ -75,6 +77,7 @@ export async function updateMatch(
       score2: m.score2,
       played: m.played,
       isOvertime: m.isOvertime,
+      postponed: (m as any).postponed,
       round: m.round,
       nextMatchId: m.nextMatchId || undefined,
       nextMatchSlot: (m.nextMatchSlot as 1 | 2) || undefined,
@@ -122,6 +125,6 @@ export async function updateMatch(
     return match;
   } catch (error) {
     console.error("Error updating match:", error);
-    throw new Error("Failed to update match");
+    throw error;
   }
 }

@@ -33,6 +33,7 @@ export const FixtureList = ({
       p2Saves: string;
       p2Points: string;
       date: string;
+      postponed: boolean;
     };
   }>({});
 
@@ -55,6 +56,7 @@ export const FixtureList = ({
         p2Saves: match.player2Stats?.saves.toString() || "0",
         p2Points: match.player2Stats?.pointsInMatch.toString() || "0",
         date: scheduledDate,
+        postponed: match.postponed || false,
       },
     });
   };
@@ -67,6 +69,7 @@ export const FixtureList = ({
     const scheduledDate = scheduledDateStr
       ? new Date(scheduledDateStr)
       : undefined;
+    const postponed = scores[matchId]?.postponed || false;
 
     // Stats
     const p1Stats = {
@@ -91,6 +94,7 @@ export const FixtureList = ({
         p1Stats,
         p2Stats,
         scheduledDate,
+        postponed,
       );
       setEditingMatchId(null);
     }
@@ -151,6 +155,11 @@ export const FixtureList = ({
                 <h4 className="text-xl font-black uppercase tracking-widest text-slate-100 group-hover:text-brand-secondary transition-colors">
                   Fecha {round}
                 </h4>
+                {roundMatches.every((m) => m.played) && (
+                  <span className="ml-4 px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 text-[10px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(34,197,94,0.2)]">
+                    Fecha Finalizada
+                  </span>
+                )}
               </div>
               <motion.div
                 animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -255,25 +264,33 @@ export const FixtureList = ({
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-3 font-orbitron font-black text-2xl">
-                                  <span
-                                    className={
-                                      match.played
-                                        ? "text-slate-100"
-                                        : "text-slate-700"
-                                    }
-                                  >
-                                    {match.played ? match.score1 : "?"}
-                                  </span>
-                                  <span className="text-slate-700">:</span>
-                                  <span
-                                    className={
-                                      match.played
-                                        ? "text-slate-100"
-                                        : "text-slate-700"
-                                    }
-                                  >
-                                    {match.played ? match.score2 : "?"}
-                                  </span>
+                                  {match.postponed ? (
+                                    <span className="text-yellow-500 text-sm md:text-base tracking-widest uppercase">
+                                      Postergado
+                                    </span>
+                                  ) : (
+                                    <>
+                                      <span
+                                        className={
+                                          match.played
+                                            ? "text-slate-100"
+                                            : "text-slate-700"
+                                        }
+                                      >
+                                        {match.played ? match.score1 : "?"}
+                                      </span>
+                                      <span className="text-slate-700">:</span>
+                                      <span
+                                        className={
+                                          match.played
+                                            ? "text-slate-100"
+                                            : "text-slate-700"
+                                        }
+                                      >
+                                        {match.played ? match.score2 : "?"}
+                                      </span>
+                                    </>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -321,6 +338,37 @@ export const FixtureList = ({
                                     }`}
                                   >
                                     TE
+                                  </span>
+                                </label>
+                              )}
+
+                              {editingMatchId === match.id && (
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={
+                                      scores[match.id]?.postponed || false
+                                    }
+                                    onChange={(e) =>
+                                      setScores({
+                                        ...scores,
+                                        [match.id]: {
+                                          ...scores[match.id],
+                                          postponed: e.target.checked,
+                                          // If postponed, reset scores/played visual if needed, but keeping simple
+                                        },
+                                      })
+                                    }
+                                    className="hidden"
+                                  />
+                                  <span
+                                    className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase border transition-all ${
+                                      scores[match.id]?.postponed
+                                        ? "bg-yellow-500 text-black border-yellow-500"
+                                        : "bg-slate-800 text-slate-500 border-slate-700"
+                                    }`}
+                                  >
+                                    POST
                                   </span>
                                 </label>
                               )}

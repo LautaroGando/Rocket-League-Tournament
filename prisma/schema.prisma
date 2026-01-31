@@ -87,4 +87,5 @@ model Match {
   nextMatchSlot Int?
 
   scheduledDate DateTime?
+  postponed     Boolean   @default(false)
 }

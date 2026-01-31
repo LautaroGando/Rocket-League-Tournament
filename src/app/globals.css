@@ -81,3 +81,43 @@
     }
   }
 }
+
+/* Custom Scrollbar - Extremely Professional & Themed */
+@layer base {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      var(--color-brand-primary) 0%,
+      var(--color-brand-secondary) 100%
+    );
+    border-radius: 9999px;
+    border: 2px solid #030712; /* Matches body bg for floating effect */
+    box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2); /* Subtle inner depth */
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #60a5fa 0%, #a78bfa 100%);
+    box-shadow:
+      inset 0 0 6px rgba(255, 255, 255, 0.4),
+      0 0 15px rgba(59, 130, 246, 0.5); /* Outer glow on hover */
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Firefox Support */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-brand-primary) #030712;
+  }
+}

@@ -80,6 +80,7 @@ interface Props {
     player1Stats?: { shots: number; saves: number; pointsInMatch: number },
     player2Stats?: { shots: number; saves: number; pointsInMatch: number },
     scheduledDate?: Date,
+    postponed?: boolean,
   ) => Promise<void>;
 
   createNextSeason: (tournamentId: string, seasonName: string) => Promise<void>;
@@ -152,6 +153,7 @@ const mapPrismaToTournament = (data: PrismaTournamentPayload): ITournament => {
           score2: m.score2,
           played: m.played,
           isOvertime: m.isOvertime,
+          postponed: m.postponed,
           round: m.round,
           nextMatchId: m.nextMatchId || undefined,
           nextMatchSlot: m.nextMatchSlot as 1 | 2 | undefined,
@@ -274,8 +276,8 @@ export const useTournamentStore = create<Props>((set, get) => ({
     await get().loadTournaments();
   },
 
-  updateMatch: async (tId, dId, mId, s1, s2, ot, p1s, p2s, sd) => {
-    await MatchActions.updateMatch(tId, dId, mId, s1, s2, ot, p1s, p2s, sd);
+  updateMatch: async (tId, dId, mId, s1, s2, ot, p1s, p2s, sd, pp) => {
+    await MatchActions.updateMatch(tId, dId, mId, s1, s2, ot, p1s, p2s, sd, pp);
     await get().loadTournaments();
   },
 

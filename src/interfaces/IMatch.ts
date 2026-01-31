@@ -21,4 +21,5 @@ export interface IMatch {
   nextMatchSlot?: 1 | 2;
   round: number;
   scheduledDate?: string;
+  postponed?: boolean;
 }
