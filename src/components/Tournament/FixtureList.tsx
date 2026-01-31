@@ -19,8 +19,26 @@ export const FixtureList = ({
   readOnly = false,
 }: Props) => {
   const { updateMatch } = useTournamentStore();
+  // Determine active round for auto-expansion
+  const getInitialRound = () => {
+    if (!matches || matches.length === 0) return [1];
+
+    const rounds = Array.from(new Set(matches.map((m) => m.round))).sort(
+      (a, b) => a - b,
+    );
+    for (const r of rounds) {
+      const roundMatches = matches.filter((m) => m.round === r);
+      // If round is NOT finished (either not played OR has postponed matches), it's active
+      const isFinished = roundMatches.every((m) => m.played && !m.postponed);
+      if (!isFinished) return [r];
+    }
+    // If all finished, return the last one (or empty)
+    return [rounds[rounds.length - 1] || 1];
+  };
+
   const [editingMatchId, setEditingMatchId] = useState<string | null>(null);
-  const [expandedRounds, setExpandedRounds] = useState<number[]>([1]);
+  const [expandedRounds, setExpandedRounds] =
+    useState<number[]>(getInitialRound());
   const [scores, setScores] = useState<{
     [key: string]: {
       s1: string;
@@ -155,11 +173,19 @@ export const FixtureList = ({
                 <h4 className="text-xl font-black uppercase tracking-widest text-slate-100 group-hover:text-brand-secondary transition-colors">
                   Fecha {round}
                 </h4>
-                {roundMatches.every((m) => m.played) && (
+                {roundMatches.every((m) => m.played && !m.postponed) ? (
                   <span className="ml-4 px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 text-[10px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(34,197,94,0.2)]">
                     Fecha Finalizada
                   </span>
-                )}
+                ) : roundMatches.some((m) => m.postponed) ? (
+                  <span className="ml-4 px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-500 border border-yellow-500/30 text-[10px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(234,179,8,0.2)]">
+                    Con Postergados
+                  </span>
+                ) : roundMatches.some((m) => m.played) ? (
+                  <span className="ml-4 px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[10px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+                    En Progreso
+                  </span>
+                ) : null}
               </div>
               <motion.div
                 animate={{ rotate: isExpanded ? 180 : 0 }}

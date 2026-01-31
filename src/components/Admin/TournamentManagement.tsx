@@ -552,6 +552,7 @@ export const TournamentManagement = ({
 
           <div className="space-y-6">
             <FixtureList
+              key={activeDivision.id}
               tournamentId={tournament.id}
               divisionId={activeDivision.id}
               matches={activeDivision.matches}
