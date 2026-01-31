@@ -164,32 +164,34 @@ export const FixtureList = ({
                     : [...prev, rNum],
                 );
               }}
-              className="w-full flex items-center justify-between p-5 cursor-pointer bg-slate-900/40 hover:bg-slate-800/40 transition-all group"
+              className="w-full flex items-start md:items-center justify-between p-4 md:p-5 cursor-pointer bg-slate-900/40 hover:bg-slate-800/40 transition-all group"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-brand-secondary/20 text-brand-secondary font-black border border-brand-secondary/30">
-                  {round}
+              <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 flex-1">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 flex shrink-0 items-center justify-center rounded-xl bg-brand-secondary/20 text-brand-secondary font-black border border-brand-secondary/30 text-lg">
+                    {round}
+                  </div>
+                  <h4 className="text-lg md:text-xl font-black uppercase tracking-widest text-slate-100 group-hover:text-brand-secondary transition-colors whitespace-nowrap">
+                    Fecha {round}
+                  </h4>
                 </div>
-                <h4 className="text-xl font-black uppercase tracking-widest text-slate-100 group-hover:text-brand-secondary transition-colors">
-                  Fecha {round}
-                </h4>
                 {roundMatches.every((m) => m.played && !m.postponed) ? (
-                  <span className="ml-4 px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 text-[10px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(34,197,94,0.2)]">
+                  <span className="self-start md:self-auto md:ml-4 px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 text-[10px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(34,197,94,0.2)]">
                     Fecha Finalizada
                   </span>
                 ) : roundMatches.some((m) => m.postponed) ? (
-                  <span className="ml-4 px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-500 border border-yellow-500/30 text-[10px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(234,179,8,0.2)]">
+                  <span className="self-start md:self-auto md:ml-4 px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-500 border border-yellow-500/30 text-[10px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(234,179,8,0.2)]">
                     Con Postergados
                   </span>
                 ) : roundMatches.some((m) => m.played) ? (
-                  <span className="ml-4 px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[10px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+                  <span className="self-start md:self-auto md:ml-4 px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[10px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(59,130,246,0.2)]">
                     En Progreso
                   </span>
                 ) : null}
               </div>
               <motion.div
                 animate={{ rotate: isExpanded ? 180 : 0 }}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 group-hover:text-slate-100 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 group-hover:text-slate-100 transition-colors ml-2 mt-1 md:mt-0"
               >
                 ▼
               </motion.div>
@@ -213,13 +215,13 @@ export const FixtureList = ({
                         transition={{ delay: mIdx * 0.05 }}
                         className="relative group/match"
                       >
-                        <div className="flex flex-col gap-3 p-4 rounded-2xl bg-slate-800/30 border border-slate-700/50 hover:border-brand-primary/30 hover:bg-slate-800/50 transition-all">
+                        <div className="flex flex-col gap-2 md:gap-3 p-3 md:p-4 rounded-2xl bg-slate-800/30 border border-slate-700/50 hover:border-brand-primary/30 hover:bg-slate-800/50 transition-all">
                           {/* Date & Meta */}
-                          <div className="flex justify-between items-center text-[10px] uppercase font-bold tracking-[0.2em]">
+                          <div className="flex flex-col md:flex-row justify-between md:items-center text-[10px] uppercase font-bold tracking-[0.2em] gap-2 mb-1">
                             <span className="text-slate-500">
-                              Partido #{match.id.slice(-4)}
+                              #{match.id.slice(-4)}
                             </span>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
                               {editingMatchId === match.id ? (
                                 <input
                                   type="datetime-local"
@@ -233,7 +235,7 @@ export const FixtureList = ({
                                       },
                                     })
                                   }
-                                  className="bg-slate-900 text-brand-accent border border-slate-700 rounded px-2 py-1 outline-none focus:border-brand-accent"
+                                  className="bg-slate-900 text-brand-accent border border-slate-700 rounded px-2 py-1 outline-none focus:border-brand-accent max-w-[150px]"
                                 />
                               ) : (
                                 <span className="text-brand-accent/70">
@@ -247,13 +249,13 @@ export const FixtureList = ({
                           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 md:gap-6">
                             <div className="text-right">
                               <span
-                                className={`text-sm md:text-base font-black uppercase tracking-tight ${match.played && match.score1! > match.score2! ? "text-brand-primary text-glow" : "text-slate-100"}`}
+                                className={`text-xs md:text-base font-black uppercase tracking-tight ${match.played && match.score1! > match.score2! ? "text-brand-primary text-glow" : "text-slate-100"}`}
                               >
                                 {match.player1}
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-3 bg-slate-950/50 px-4 py-2 rounded-xl backdrop-blur-sm border border-slate-800 shadow-inner">
+                            <div className="flex items-center gap-2 md:gap-3 bg-slate-950/50 px-2 md:px-4 py-2 rounded-xl backdrop-blur-sm border border-slate-800 shadow-inner min-w-[80px] justify-center">
                               {editingMatchId === match.id ? (
                                 <div className="flex items-center gap-2">
                                   <input
@@ -323,7 +325,7 @@ export const FixtureList = ({
 
                             <div className="text-left">
                               <span
-                                className={`text-sm md:text-base font-black uppercase tracking-tight ${match.played && match.score2! > match.score1! ? "text-brand-primary text-glow" : "text-slate-100"}`}
+                                className={`text-xs md:text-base font-black uppercase tracking-tight ${match.played && match.score2! > match.score1! ? "text-brand-primary text-glow" : "text-slate-100"}`}
                               >
                                 {match.player2}
                               </span>
