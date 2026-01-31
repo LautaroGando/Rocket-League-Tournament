@@ -27,6 +27,7 @@ export const AdminPanel = () => {
     TournamentType.LEAGUE,
   );
   const [numberOfGroups, setNumberOfGroups] = useState(2);
+  const [qualifiersPerGroup, setQualifiersPerGroup] = useState(2);
 
   // Auth State
   const [email, setEmail] = useState("");
@@ -121,11 +122,44 @@ export const AdminPanel = () => {
       );
 
       if (newId) {
+        // Find the created division (Grupo A) and update its settings
+        await useTournamentStore.getState().loadTournaments();
+        const createdTournament = useTournamentStore
+          .getState()
+          .tournaments.find((t) => t.id === newId);
+        const groupADiv = createdTournament?.divisions.find(
+          (d) => d.name === "Grupo A",
+        );
+
+        if (groupADiv) {
+          await useTournamentStore
+            .getState()
+            .updateDivisionSettings(
+              newId,
+              groupADiv.id,
+              qualifiersPerGroup,
+              0,
+              0,
+              0,
+            );
+        }
+
         for (let i = 1; i < groupsCount; i++) {
           const groupName = `Grupo ${String.fromCharCode(65 + i)}`;
           const newDivId = await addDivision(newId, groupName);
           if (newDivId) {
             await addPlayersToDivision(newId, newDivId, outputGroups[i]);
+            // Update settings for the new group
+            await useTournamentStore
+              .getState()
+              .updateDivisionSettings(
+                newId,
+                newDivId,
+                qualifiersPerGroup,
+                0,
+                0,
+                0,
+              );
           }
         }
       }
@@ -143,6 +177,7 @@ export const AdminPanel = () => {
     setInitialPlayers("");
     setTournamentType(TournamentType.LEAGUE);
     setNumberOfGroups(2);
+    setQualifiersPerGroup(2);
   };
 
   const handleDelete = async (id: string) => {
@@ -351,7 +386,7 @@ export const AdminPanel = () => {
                   <input
                     type="range"
                     min={2}
-                    max={8}
+                    max={16}
                     step={1}
                     value={numberOfGroups}
                     onChange={(e) =>
@@ -376,6 +411,30 @@ export const AdminPanel = () => {
                   className="w-full bg-slate-950/50 rounded-2xl px-5 py-4 border border-slate-800 focus:border-brand-primary transition-all outline-none"
                   placeholder="Clasificación A (Opcional)"
                 />
+              </div>
+            )}
+
+            {tournamentType === TournamentType.CHAMPIONS && (
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-green-500 uppercase tracking-widest ml-1">
+                  Clasifican por Grupo (Zona Verde)
+                </label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min={1}
+                    max={16}
+                    step={1}
+                    value={qualifiersPerGroup}
+                    onChange={(e) =>
+                      setQualifiersPerGroup(parseInt(e.target.value))
+                    }
+                    className="flex-1 accent-green-500 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <span className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 font-black text-green-500">
+                    {qualifiersPerGroup}
+                  </span>
+                </div>
               </div>
             )}
 
@@ -481,7 +540,7 @@ export const AdminPanel = () => {
                             ? "LIGA"
                             : t.type === "CUP"
                               ? "COPA"
-                              : "CHAMPIONS"}
+                              : "FASE DE GRUPO + COPA"}
                         </span>
                       </div>
                     </div>

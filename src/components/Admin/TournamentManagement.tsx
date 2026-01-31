@@ -284,14 +284,9 @@ export const TournamentManagement = ({
             !tournament.divisions.some((d) => d.name === "Fase Final") && (
               <button
                 onClick={async () => {
-                  const spots = await showPrompt(
-                    "Despliegue Fase Final",
-                    "Clasificados por grupo:",
-                    "2",
-                  );
-                  if (spots && !isNaN(parseInt(spots))) {
-                    createPlayoffsDivision(tournament.id, parseInt(spots));
-                  }
+                  const spots =
+                    tournament.divisions[0]?.directPromotionSpots || 2;
+                  createPlayoffsDivision(tournament.id, spots);
                 }}
                 className="flex-1 xl:flex-none bg-brand-accent hover:bg-amber-400 text-white font-black py-3 px-8 rounded-xl shadow-[0_0_20px_rgba(234,179,8,0.3)] transition-all uppercase tracking-widest text-xs"
               >

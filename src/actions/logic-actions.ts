@@ -36,7 +36,10 @@ export async function generateFixtureAction(
       ? generateCupFixture(
           divisionId,
           division.players as unknown as IPlayer[],
-          tournament.type === TournamentType.CUP,
+          // Disable shuffle if it's the Champions Final Phase to preserve seeding
+          tournament.type === TournamentType.CUP ||
+            (tournament.type === TournamentType.CHAMPIONS &&
+              !division.name.includes("Fase Final")),
         )
       : generateLeagueFixture(
           divisionId,
@@ -175,14 +178,18 @@ export async function createPlayoffsDivision(
 
     if (!tournament) throw new Error("Tournament not found");
 
-    const regularDivisions = tournament.divisions.filter(
-      (d) =>
-        !d.name.includes("Fase Final") &&
-        !d.name.toLowerCase().includes("promoc"),
-    );
+    const regularDivisions = tournament.divisions
+      .filter(
+        (d) =>
+          !d.name.includes("Fase Final") &&
+          !d.name.toLowerCase().includes("promoc"),
+      )
+      .sort((a, b) => a.name.localeCompare(b.name)); // Ensure A, B, C, D order
 
-    const qualifiedPlayers: string[] = [];
+    const qualifiedPlayersByName: string[] = [];
+    const groupedQualifiers: Player[][] = [];
 
+    // 1. Extract and sort qualifiers for each group
     regularDivisions.forEach((div) => {
       const sorted = [...div.players]
         .sort(
@@ -190,11 +197,56 @@ export async function createPlayoffsDivision(
             b.points - a.points || b.goalDifference - a.goalDifference,
         )
         .slice(0, spotsPerGroup);
-
-      qualifiedPlayers.push(...sorted.map((p) => p.name));
+      groupedQualifiers.push(sorted);
     });
 
-    if (qualifiedPlayers.length === 0) throw new Error("No players qualified");
+    // 2. Pair Groups (A&B, C&D, etc.) using Cross-Seeding
+    // Logic: A1 vs B2, B1 vs A2
+    // If spotsPerGroup > 2, logic extends (A1 vs B4, B1 vs A4, etc), but basic request is 1st vs 2nd
+    for (let i = 0; i < groupedQualifiers.length; i += 2) {
+      if (i + 1 < groupedQualifiers.length) {
+        const group1 = groupedQualifiers[i]; // Group A
+        const group2 = groupedQualifiers[i + 1]; // Group B
+
+        // We alternate adding pairs to the text fixtures generate A1 vs B2, then B1 vs A2
+        const maxLen = Math.max(group1.length, group2.length);
+
+        for (let j = 0; j < maxLen; j++) {
+          // Multiply by 2 because we're interleaving two sets of pairings
+          if (j % 2 === 0) {
+            // Even index (0, 2...): A1 vs B2, A2 vs B3...
+            // Logic: Top of G1 vs Bottom of G2 (relative to remaining window)
+            // Implementation: Simple standard pairing A(top) vs B(bottom-ish)
+            // Pattern: A1 vs B(Last), B1 vs A(Last)
+
+            // For j=0: A1 vs B2 (assuming 2 spots)
+            // G1 index: j/2 -> 0.
+            // G2 index: len - 1 - (j/2) -> 2 - 1 - 0 = 1.
+            const idx = j / 2;
+            if (idx < group1.length && group2.length - 1 - idx >= 0) {
+              qualifiedPlayersByName.push(group1[idx].name);
+              qualifiedPlayersByName.push(group2[group2.length - 1 - idx].name);
+            }
+          } else {
+            // Odd index (1, 3...): B1 vs A2
+            // G2 index: (j-1)/2 -> 0.
+            // G1 index: len - 1 - 0 = 1.
+            const idx = (j - 1) / 2;
+            if (idx < group2.length && group1.length - 1 - idx >= 0) {
+              qualifiedPlayersByName.push(group2[idx].name);
+              qualifiedPlayersByName.push(group1[group1.length - 1 - idx].name);
+            }
+          }
+        }
+      } else {
+        // Odd group out (e.g. Group E), just add them
+        const group = groupedQualifiers[i];
+        group.forEach((p) => qualifiedPlayersByName.push(p.name));
+      }
+    }
+
+    if (qualifiedPlayersByName.length === 0)
+      throw new Error("No players qualified");
 
     const finalDiv = await prisma.division.create({
       data: {
@@ -204,7 +256,7 @@ export async function createPlayoffsDivision(
     });
 
     await prisma.player.createMany({
-      data: qualifiedPlayers.map((name) => ({
+      data: qualifiedPlayersByName.map((name) => ({
         name,
         divisionId: finalDiv.id,
       })),

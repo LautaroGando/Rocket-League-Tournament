@@ -28,11 +28,14 @@ export const FixtureList = ({
     );
     for (const r of rounds) {
       const roundMatches = matches.filter((m) => m.round === r);
-      // If round is NOT finished (either not played OR has postponed matches), it's active
-      const isFinished = roundMatches.every((m) => m.played && !m.postponed);
-      if (!isFinished) return [r];
+      // Logic: If there is at least one match that is NOT played AND NOT postponed, then this is the active round.
+      // If all matches are either played or postponed, we assume this round is "done" for the open view.
+      const hasPendingMatches = roundMatches.some(
+        (m) => !m.played && !m.postponed,
+      );
+      if (hasPendingMatches) return [r];
     }
-    // If all finished, return the last one (or empty)
+    // If all rounds are fully played/postponed, return the last one (or logic for "finished tournament")
     return [rounds[rounds.length - 1] || 1];
   };
 
