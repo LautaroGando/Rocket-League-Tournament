@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Tournament {
+  id     String   @id @default(uuid())
+  name   String
+  date   DateTime @default(now())
+  type   String   @default("LEAGUE") // LEAGUE, CUP, CHAMPIONS
+  status String   @default("ACTIVE") // ACTIVE, FINISHED
+
+  championId String?
+  champion   Player? @relation("TournamentChampion", fields: [championId], references: [id])
+
+  divisions Division[]
+}
+
+model Division {
+  id           String     @id @default(uuid())
+  name         String
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  // Logic Config
+  directPromotionSpots   Int @default(0)
+  playoffPromotionSpots  Int @default(0)
+  directRelegationSpots  Int @default(0)
+  playoffRelegationSpots Int @default(0)
+  
+  createdAt DateTime @default(now())
+
+  players Player[]
+  matches Match[]
+}
+
+model Player {
+  id         String   @id @default(uuid())
+  name       String
+  divisionId String
+  division   Division @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+
+  // Stats
+  points         Int          @default(0)
+  gamesPlayed    Int          @default(0)
+  matchesWon     Int          @default(0)
+  matchesLost    Int          @default(0)
+  matchesTied    Int          @default(0)
+  extraTimeGames Int          @default(0)
+  goalsInFavor   Int          @default(0)
+  goalsAgainst   Int          @default(0)
+  goalDifference Int          @default(0)
+  pointsInMatch  Int          @default(0)
+  shooting       Int          @default(0)
+  saved          Int          @default(0)
+  championedTournaments Tournament[] @relation("TournamentChampion")
+}
+
+model Match {
+  id         String   @id @default(uuid())
+  divisionId String
+  division   Division @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+
+  player1Name String
+  player2Name String
+  score1      Int?
+  score2      Int?
+  played      Boolean @default(false)
+  isOvertime  Boolean @default(false)
+
+  // Stats Player 1
+  p1Shots  Int @default(0)
+  p1Saves  Int @default(0)
+  p1Points Int @default(0)
+
+  // Stats Player 2
+  p2Shots  Int @default(0)
+  p2Saves  Int @default(0)
+  p2Points Int @default(0)
+
+  // Bracket Logic
+  round         Int     @default(1)
+  nextMatchId   String?
+  nextMatchSlot Int?
+
+  scheduledDate DateTime?
+}
