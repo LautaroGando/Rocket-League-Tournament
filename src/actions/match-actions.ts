@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { calculateDivisionStats } from "@/helpers/statsHelper";
 import { IMatch, IPlayer } from "@/interfaces";
-import { Prisma } from "@prisma/client";
 
 export async function updateMatch(
   tournamentId: string,
@@ -24,7 +23,7 @@ export async function updateMatch(
       data: {
         score1,
         score2,
-        played: true,
+        played: postponed ? false : true,
         isOvertime,
         postponed: postponed || false,
         p1Shots: player1Stats?.shots || 0,
@@ -77,7 +76,7 @@ export async function updateMatch(
       score2: m.score2,
       played: m.played,
       isOvertime: m.isOvertime,
-      postponed: (m as any).postponed,
+      postponed: m.postponed,
       round: m.round,
       nextMatchId: m.nextMatchId || undefined,
       nextMatchSlot: (m.nextMatchSlot as 1 | 2) || undefined,

@@ -8,7 +8,7 @@ export const calculateDivisionStats = (
   const resetPlayers = players.map((p) => resetPlayerStats(p));
 
   matches.forEach((m) => {
-    if (m.played && m.score1 !== null && m.score2 !== null) {
+    if (m.played && m.score1 !== null && m.score2 !== null && !m.postponed) {
       const p1Index = resetPlayers.findIndex((p) => p.name === m.player1);
       const p2Index = resetPlayers.findIndex((p) => p.name === m.player2);
 
