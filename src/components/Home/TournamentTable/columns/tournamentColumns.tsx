@@ -88,4 +88,16 @@ export const tournamentColumns: ColumnDef<IPlayer>[] = [
       );
     },
   },
+  {
+    accessorKey: "pointsInMatch",
+    header: "Pts Juego",
+  },
+  {
+    accessorKey: "shooting",
+    header: "Tiros",
+  },
+  {
+    accessorKey: "saved",
+    header: "Salvadas",
+  },
 ];

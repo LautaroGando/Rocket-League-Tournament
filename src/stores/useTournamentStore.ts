@@ -182,7 +182,9 @@ export const useTournamentStore = create<Props>((set, get) => ({
   setActiveTournament: (id) => set({ activeTournamentId: id }),
 
   loadTournaments: async () => {
-    set({ isLoading: true });
+    if (get().tournaments.length === 0) {
+      set({ isLoading: true });
+    }
     try {
       const data = await TournamentActions.getTournaments();
       const mapped = (data as unknown as PrismaTournamentPayload[]).map((t) =>
