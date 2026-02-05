@@ -83,8 +83,10 @@ export const FixtureList = ({
   };
 
   const handleSave = (matchId: string) => {
-    const s1 = parseInt(scores[matchId]?.s1 || "");
-    const s2 = parseInt(scores[matchId]?.s2 || "");
+    const s1Raw = scores[matchId]?.s1;
+    const s2Raw = scores[matchId]?.s2;
+    const s1 = s1Raw === "" ? null : parseInt(s1Raw || "");
+    const s2 = s2Raw === "" ? null : parseInt(s2Raw || "");
     const isOvertime = scores[matchId]?.isOvertime || false;
     const scheduledDateStr = scores[matchId]?.date;
     const scheduledDate = scheduledDateStr
@@ -109,8 +111,8 @@ export const FixtureList = ({
         tournamentId,
         divisionId,
         matchId,
-        isNaN(s1) ? 0 : s1,
-        isNaN(s2) ? 0 : s2,
+        s1 === null || isNaN(s1) ? null : s1,
+        s2 === null || isNaN(s2) ? null : s2,
         isOvertime,
         p1Stats,
         p2Stats,

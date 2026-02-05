@@ -9,8 +9,8 @@ export async function updateMatch(
   tournamentId: string,
   divisionId: string,
   matchId: string,
-  score1: number,
-  score2: number,
+  score1: number | null,
+  score2: number | null,
   isOvertime: boolean,
   player1Stats?: { shots: number; saves: number; pointsInMatch: number },
   player2Stats?: { shots: number; saves: number; pointsInMatch: number },
@@ -18,12 +18,14 @@ export async function updateMatch(
   postponed?: boolean,
 ) {
   try {
+    const isPlayed = score1 !== null && score2 !== null && !postponed;
+
     const match = await prisma.match.update({
       where: { id: matchId },
       data: {
         score1,
         score2,
-        played: postponed ? false : true,
+        played: isPlayed,
         isOvertime,
         postponed: postponed || false,
         p1Shots: player1Stats?.shots || 0,
